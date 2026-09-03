@@ -11,8 +11,15 @@ jobs:
       - name: "Extract zip"
         shell: pwsh
         run: |
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
           $zip = Get-ChildItem -Path . -Filter *.zip -File | Select-Object -First 1
-          if ($zip) { Expand-Archive -Path $zip.FullName -DestinationPath . -Force }
+          if ($zip) {
+            Write-Host "Extracting $($zip.Name) ..."
+            [System.IO.Compression.ZipFile]::ExtractToDirectory($zip.FullName, (Get-Location).Path, $true)
+            Write-Host "Done."
+          } else {
+            Write-Host "No zip file found at repo root."
+          }
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
